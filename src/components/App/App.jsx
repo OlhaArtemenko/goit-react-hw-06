@@ -1,53 +1,22 @@
-import { useState, useEffect } from "react";
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+import { store, persistor } from "../../redux/store";
 import css from "./App.module.css";
-import initialContacts from "../../contacts.json";
-import ContactForm from "../ContactForm/ContactForm.jsx";
-import SearchBox from "../SearchBox/SearchBox.jsx";
-import ContactList from "../ContactList/ContactList.jsx";
+import ContactForm from "../ContactForm/ContactForm";
+import SearchBox from "../SearchBox/SearchBox";
+import ContactList from "../ContactList/ContactList";
 
 export default function App() {
-  const [contacts, setContacts] = useState(() => {
-    const savedContacts = localStorage.getItem("contact");
-    if (savedContacts !== null) {
-      return JSON.parse(savedContacts);
-    }
-    return initialContacts;
-  });
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const addContact = (newContact) => {
-    setContacts((prevContacts) => {
-      return [...prevContacts, newContact];
-    });
-  };
-
-  const deleteContact = (contactId) => {
-    setContacts((prevContacts) => {
-      return prevContacts.filter((contact) => contact.id !== contactId);
-    });
-  };
-
-  useEffect(() => {
-    localStorage.setItem("contact", JSON.stringify(contacts));
-  }, [contacts]);
-
-  const filteredContacts = contacts.filter((contact) =>
-    contact.name
-      .toLowerCase()
-      .split(" ")
-      .some((word) => word.startsWith(searchQuery.toLowerCase()))
-  );
-
-  const handleSearch = (query) => {
-    setSearchQuery(query);
-  };
-
   return (
-    <div>
-      <h1>Phonebook</h1>
-      <ContactForm onAdd={addContact} />
-      <SearchBox handleSearch={handleSearch} />
-      <ContactList contacts={filteredContacts} onDelete={deleteContact} />
-    </div>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <div className={css.container}>
+          <h1>Phonebook</h1>
+          <ContactForm />
+          <SearchBox />
+          <ContactList />
+        </div>
+      </PersistGate>
+    </Provider>
   );
 }
